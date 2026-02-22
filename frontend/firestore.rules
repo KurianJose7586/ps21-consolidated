@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function getMember(boardId) {
+      return get(/databases/$(database)/documents/boards/$(boardId)/members/$(request.auth.uid));
+    }
+
+    function isMember(boardId) {
+      return isAuth() && exists(/databases/$(database)/documents/boards/$(boardId)/members/$(request.auth.uid));
+    }
+
+    function hasRole(boardId, roles) {
+      return isMember(boardId) && getMember(boardId).data.role in roles;
+    }
+
+    // ─── /users/{uid} ─────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isAuth();
+      allow create, update: if isAuth() && request.auth.uid == uid;
+      allow delete: if false;
+
+      // /users/{uid}/boards/{boardId} — membership index for dashboard lookup
+      match /boards/{boardId} {
+        // User can read their own memberships
+        allow read: if isAuth() && request.auth.uid == uid;
+        // Any authenticated user can write (needed for acceptInvite and ensureBoardExists)
+        allow write: if isAuth();
+      }
+    }
+
+
+    // ─── /boards/{boardId} ────────────────────────────────────────────────────
+    match /boards/{boardId} {
+      allow read: if isMember(boardId);
+      // Any authenticated user can create a board
+      allow create: if isAuth();
+      // Owners and editors can update board content
+      allow update: if hasRole(boardId, ['owner', 'editor']);
+      allow delete: if hasRole(boardId, ['owner']);
+
+      // ─── /boards/{boardId}/members/{memberUid} ────────────────────────────
+      match /members/{memberUid} {
+        // Any member can read the members list
+        allow read: if isMember(boardId);
+
+        // CREATE rules (covers both owner seeding and invite acceptance):
+        // 1. Existing owners can add new members
+        // 2. Any authenticated user can create THEIR OWN member doc
+        //    (used for invite acceptance and owner self-seeding)
+        allow create: if isAuth() && (
+          hasRole(boardId, ['owner'])
+          || request.auth.uid == memberUid
+        );
+
+        // Only owners can change roles or remove members
+        allow update: if hasRole(boardId, ['owner']);
+        allow delete: if hasRole(boardId, ['owner']);
+      }
+    }
+
+    // ─── /invites/{token} ─────────────────────────────────────────────────────
+    match /invites/{token} {
+      // Any authenticated user can read an invite (to validate it)
+      allow read: if isAuth();
+      // Board members can create invites (createInvite is called by the owner)
+      allow create: if isAuth();
+      // Allow marking an invite as used (used: false → true only)
+      allow update: if isAuth()
+        && request.resource.data.used == true
+        && resource.data.used == false;
+      allow delete: if false;
+    }
+  }
+}

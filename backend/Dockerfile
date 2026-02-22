@@ -1,32 +1,32 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use Bullseye as it is stable for your current Python version
+FROM python:3.9-slim-bullseye
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Set the working directory in the container
+# Set the working directory
 WORKDIR /app
 
+# Ensure we are running as root
+USER root
+
 # Install system dependencies
-# We consolidate to prevent metadata mismatch (exit code 100)
+# Removed libharfbuzz-subset0 as it's not in Bullseye mirrors
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    # Core graphics and PDF dependencies for WeasyPrint
+    # WeasyPrint and PDF dependencies for Bullseye
     libcairo2 \
     libpango-1.0-0 \
-    libpangoft2-1.0-0 \
     libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
     libgdk-pixbuf2.0-0 \
-    libglib2.0-0 \
-    # Missing fonts and subsetting tools for PDF rendering
-    libharfbuzz-subset0 \
-    shared-mime-info \
     libffi-dev \
-    libjpeg-dev \
-    libopenjp2-7-dev \
+    shared-mime-info \
+    # Standard harfbuzz for font support in Bullseye
+    libharfbuzz0b \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -35,6 +35,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
+# This copies everything from your /backend folder into /app in the container
 COPY . .
 
 # Expose the API port
