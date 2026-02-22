@@ -1,0 +1,54 @@
+# Environment variables
+.env
+.env.backup
+.env.bak
+
+# Databases
+*.db
+*.db.backup
+*.db.bak
+*.sqlite3
+
+# Python compilation
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environment
+env/
+venv/
+.venv/
+*.egg-info/
+
+# Distribution & Build
+dist/
+build/
+
+# Testing
+.pytest_cache/
+test_output*.txt
+test_output*.log
+
+# Build output & Logs
+demo_output.txt
+*.log
+git_pull*.txt
+git_status*.txt
+
+# Backups & Temporary Editor Files
+*.backup
+*.bak
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+start-backend.ps1.backup
+
+# Dataset (large files)
+emails.csv
+emails.csv/
+emails.csv
+
