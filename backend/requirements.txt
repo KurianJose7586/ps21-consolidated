@@ -21,6 +21,7 @@ pymupdf>=1.22.0  # Used as 'fitz'
 # Document Generation
 python-docx>=0.8.11
 weasyprint>=60.0  # For PDF generation from HTML/Markdown
+python-multipart
 
 # Database
 psycopg2-binary>=2.9.0
