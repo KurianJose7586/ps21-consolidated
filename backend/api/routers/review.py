@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(PROJECT_ROOT)
 
-from brd_module.storage import get_noise_items, get_active_signals, restore_noise_item
+from brd_module.supabase_storage import get_noise_items, get_active_signals, restore_noise_item
 
 router = APIRouter(
     prefix="/sessions/{session_id}/chunks",

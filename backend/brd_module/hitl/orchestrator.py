@@ -1,6 +1,6 @@
 from groq import Groq
 import os
-from brd_module.storage import get_connection, create_snapshot
+from brd_module.supabase_storage import get_supabase_client, create_snapshot
 from brd_module.hitl.nl_edit_parser import parse_ad_hoc_prompt, store_edit_intent, apply_edit
 
 def get_groq_client():

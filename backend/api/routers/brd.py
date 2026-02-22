@@ -12,7 +12,7 @@ sys.path.append(PROJECT_ROOT)
 from brd_module.brd_pipeline import run_brd_generation
 from brd_module.validator import validate_brd
 from brd_module.exporter import export_brd, export_brd_to_docx
-from brd_module.storage import get_latest_brd_sections, store_brd_section, get_connection
+from brd_module.supabase_storage import get_latest_brd_sections, store_brd_section, get_validation_flags
 from brd_module.hitl.orchestrator import submit_ad_hoc_prompt
 
 router = APIRouter(
@@ -198,30 +198,11 @@ def get_brd(session_id: str, format: str = "markdown"):
             )
         sections = html_sections
 
-    conn, db_type = get_connection()
     flags = []
     try:
-        cur = conn.cursor()
-        query = """
-            SELECT section_name, flag_type, severity, description 
-            FROM brd_validation_flags 
-            WHERE session_id = %s
-            ORDER BY severity DESC
-        """
-        if db_type == "sqlite": query = query.replace("%s", "?")
-        
-        cur.execute(query, (session_id,))
-        for r in cur.fetchall():
-            flags.append({
-                "section_name": r[0],
-                "flag_type": r[1],
-                "severity": r[2],
-                "description": r[3]
-            })
+        flags = get_validation_flags(session_id)
     except Exception:
         pass
-    finally:
-        conn.close()
 
     return {
         "session_id": session_id,

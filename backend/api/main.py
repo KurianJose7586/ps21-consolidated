@@ -7,7 +7,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from .routers import sessions, ingest, review, brd, hitl
-from brd_module.storage import init_db
+from brd_module.supabase_storage import init_db
 
 # Initialize database (PG or SQLite fallback) on startup
 try:

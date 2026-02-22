@@ -2,7 +2,7 @@ import os
 import json
 from groq import Groq
 from brd_module.brd_pipeline import call_llm_with_retry, run_single_agent
-from brd_module.storage import get_connection, get_latest_brd_sections
+from brd_module.supabase_storage import get_latest_brd_sections
 from datetime import datetime, timezone
 
 VALID_EDIT_TYPES = ("add_item", "rewrite", "regenerate", "no_change", "clarify")
@@ -68,13 +68,8 @@ def store_edit_intent(
     answer_text: str,
     parsed_intent: dict
 ) -> str:
-    conn, db_type = get_connection()
     edit_id = str(os.urandom(8).hex()) # simple edit id
-    try:
-        # Intent storage skipped to keep schema clean for teammate review
-        pass
-    finally:
-        conn.close()
+    # Intent storage skipped to keep schema clean for teammate review
     return edit_id
 
 def apply_edit(

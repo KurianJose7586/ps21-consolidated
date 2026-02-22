@@ -25,7 +25,7 @@ Unlike typical AI document generators, this system behaves like a senior busines
 
 -   **Backend**: Python, FastAPI, Uvicorn
 -   **AI/LLM**: Groq (Llama 3), Google Generative AI
--   **Database**: PostgreSQL
+-   **Database**: PostgreSQL or Supabase (managed PostgreSQL)
 -   **Messaging/Integration**: Slack SDK, Google Auth
 -   **Document Generation**: Python-Docx, WeasyPrint
 -   **Frontend**: Next.js / Tailwind CSS (Conceptual/UI Design)
@@ -42,6 +42,23 @@ Unlike typical AI document generators, this system behaves like a senior busines
 -   [Complete Project Doc](CompleteProjectDoc.md): Detailed project vision and requirements.
 -   [BRD Design Doc](BRD_designDoc.md): Comprehensive UI/UX and component specifications.
 -   [SETUP.md](SETUP.md): Instructions for local setup and deployment.
+-   [SUPABASE_SETUP.md](backend/SUPABASE_SETUP.md): Guide for setting up Supabase as your database backend.
+
+## 🗄 Database Setup
+
+This project supports multiple database backends:
+
+### Option 1: Supabase (Recommended for Quick Start)
+Supabase is a managed PostgreSQL service with a simple setup:
+- Sign up at https://app.supabase.com
+- Follow the [Supabase Setup Guide](backend/SUPABASE_SETUP.md)
+- No database administration required
+
+### Option 2: PostgreSQL (Self-Hosted)
+For full control over your database:
+- Install PostgreSQL locally or on a server
+- Run `backend/supabase_schema.sql` to set up the schema
+- Configure connection details in `.env`
 
 ---
 *Built for Hackfest 2.0 - PS21*

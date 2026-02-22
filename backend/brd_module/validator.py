@@ -15,25 +15,12 @@ from groq import Groq
 _HERE = Path(__file__).parent
 load_dotenv(_HERE / ".env")
 
-from brd_module.storage import get_latest_brd_sections, get_connection
+from brd_module.supabase_storage import get_latest_brd_sections, store_validation_flag, get_validation_flags
 from brd_module.brd_pipeline import call_llm_with_retry
 
 def store_validation_flag(session_id: str, section_name: str, flag_type: str, description: str, severity: str):
-    conn, db_type = get_connection()
-    try:
-        cur = conn.cursor()
-        query = """
-            INSERT INTO brd_validation_flags (
-                flag_id, session_id, section_name, flag_type, 
-                description, severity, auto_resolvable, created_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        if db_type == "sqlite": query = query.replace("%s", "?")
-        
-        cur.execute(query, (str(uuid.uuid4()), session_id, section_name, flag_type, description, severity, False, datetime.now(timezone.utc)))
-        conn.commit()
-    finally:
-        conn.close()
+    from brd_module.supabase_storage import store_validation_flag as _store_flag
+    _store_flag(session_id, section_name, flag_type, description, severity)
 
 def validate_brd(session_id: str, client: Groq = None):
     """

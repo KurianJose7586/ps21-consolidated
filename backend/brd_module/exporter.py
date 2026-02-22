@@ -4,7 +4,7 @@ Compiles the latest version of all BRD sections into a single Markdown document,
 including a section for Validation Flags. Supports Markdown, PDF, and DOCX export
 with template-based formatting for DOCX.
 """
-from brd_module.storage import get_latest_brd_sections, get_connection
+from brd_module.supabase_storage import get_latest_brd_sections, get_validation_flags
 from datetime import datetime, timezone
 import markdown
 import re
@@ -52,31 +52,21 @@ def export_brd(session_id: str, title: str = "Business Requirements Document") -
     doc.append("---\n")
     
     # 1. Fetch Validation Flags
-    conn, db_type = get_connection()
     flags = []
     try:
-        cur = conn.cursor()
-        query = """
-            SELECT section_name, flag_type, severity, description 
-            FROM brd_validation_flags 
-            WHERE session_id = %s
-            ORDER BY severity DESC
-        """
-        if db_type == "sqlite": query = query.replace("%s", "?")
-        
-        cur.execute(query, (session_id,))
-        flags = cur.fetchall()
+        flags = get_validation_flags(session_id)
     except Exception as e:
         doc.append(f"> **Warning:** Could not fetch validation flags: {e}\n")
-    finally:
-        conn.close()
         
     if flags:
         doc.append("## 🚨 Validation Flags Required Review")
         doc.append("> The AI has detected potential issues that require human review before finalization.\n")
         
         for flag in flags:
-            section, f_type, severity, desc = flag
+            section = flag.get("section_name")
+            f_type = flag.get("flag_type")
+            severity = flag.get("severity")
+            desc = flag.get("description")
             # High severity usually gets an alert in some MD parsers
             icon = "🔴" if severity == "high" else ("🟡" if severity == "medium" else "🔵")
             doc.append(f"{icon} **[{severity.upper()}] {section.replace('_', ' ').title()} ({f_type})**: {desc}")
