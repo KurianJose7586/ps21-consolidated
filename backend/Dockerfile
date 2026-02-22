@@ -10,14 +10,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
 
 # Install system dependencies
-# We need these for psycopg2, WeasyPrint, and other libraries
+# We combine update and install to ensure fresh metadata and prevent exit code 100
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    # WeasyPrint dependencies
-    python3-pip \
-    python3-setuptools \
-    python3-wheel \
+    # WeasyPrint and PDF dependencies (python3-pip/setuptools/wheel removed as they are in the base image)
     python3-cffi \
     libcairo2 \
     libpango-1.0-0 \
