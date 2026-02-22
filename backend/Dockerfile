@@ -1,5 +1,5 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Use Bullseye specifically to avoid package name conflicts found in Bookworm
+FROM python:3.9-slim-bullseye
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -9,24 +9,24 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Set the working directory in the container
 WORKDIR /app
 
+# Ensure we are running as root to avoid permission-based exit code 100
+USER root
+
 # Install system dependencies
-# We consolidate to prevent metadata mismatch (exit code 100)
+# Consolidating packages to the most stable names for WeasyPrint and PostgreSQL
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    # Core graphics and PDF dependencies for WeasyPrint
+    # WeasyPrint and PDF dependencies for Debian Bullseye
     libcairo2 \
     libpango-1.0-0 \
-    libpangoft2-1.0-0 \
     libpangocairo-1.0-0 \
+    libpangoft2-1.0-0 \
     libgdk-pixbuf2.0-0 \
-    libglib2.0-0 \
-    # Missing fonts and subsetting tools for PDF rendering
-    libharfbuzz-subset0 \
-    shared-mime-info \
     libffi-dev \
-    libjpeg-dev \
-    libopenjp2-7-dev \
+    shared-mime-info \
+    # Added for modern WeasyPrint font support
+    libharfbuzz-subset0 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
