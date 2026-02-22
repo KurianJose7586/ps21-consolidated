@@ -10,18 +10,23 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
 
 # Install system dependencies
-# We combine update and install to ensure fresh metadata and prevent exit code 100
+# We consolidate to prevent metadata mismatch (exit code 100)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    # WeasyPrint and PDF dependencies (python3-pip/setuptools/wheel removed as they are in the base image)
-    python3-cffi \
+    # Core graphics and PDF dependencies for WeasyPrint
     libcairo2 \
     libpango-1.0-0 \
+    libpangoft2-1.0-0 \
     libpangocairo-1.0-0 \
     libgdk-pixbuf2.0-0 \
-    libffi-dev \
+    libglib2.0-0 \
+    # Missing fonts and subsetting tools for PDF rendering
+    libharfbuzz-subset0 \
     shared-mime-info \
+    libffi-dev \
+    libjpeg-dev \
+    libopenjp2-7-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -36,5 +41,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application
-# We use uvicorn to serve the FastAPI app
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
